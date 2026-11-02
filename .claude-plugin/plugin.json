@@ -1,12 +1,14 @@
 {
   "name": "worknew-jobs",
   "displayName": "WorkNew",
-  "version": "0.3.0",
-  "description": "Verken je opdrachtwensen met of zonder cv en zoek via een aangesloten WorkNew-zoekverbinding.",
+  "version": "0.4.0",
+  "description": "Zoek openbare opdrachten voor digital consultants met WorkNew. Deel je rolwensen of gebruik vrijwillig een cv.",
   "author": {
-    "name": "WorkNew"
+    "name": "WorkNew",
+    "email": "support@worknew.co",
+    "url": "https://worknew.co/mcp"
   },
-  "homepage": "https://www.worknew.co",
+  "homepage": "https://worknew.co/mcp",
   "repository": "https://github.com/CreateNewCo/worknewjobs-plugin",
   "keywords": [
     "worknew",
@@ -14,5 +16,9 @@
     "digital-consultants",
     "werk"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "license": "LicenseRef-WorkNew-Proprietary",
+  "mcpServers": "./.mcp.json",
+  "icon": "./assets/worknew-icon.svg",
+  "privacyPolicyUrl": "https://worknew.co/legal/privacy"
 }

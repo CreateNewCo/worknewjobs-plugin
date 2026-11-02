@@ -3,10 +3,12 @@
 import copy
 import hashlib
 import json
+import math
 import re
 import shutil
 import tempfile
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -62,14 +64,20 @@ def validate_sources(root=ROOT):
     manifests = [json.loads(checked_file(root, p).read_text()) for p in
                  (".claude-plugin/plugin.json", ".codex-plugin/plugin.json")]
     claude, chatgpt = manifests
-    for key in ("name", "version", "description", "author", "homepage", "repository", "keywords", "skills"):
+    for key in ("name", "version", "description", "author", "homepage", "repository", "license", "keywords", "skills", "mcpServers"):
         if claude.get(key) != chatgpt.get(key):
             raise ContractError(f"Source manifests disagree on {key}")
     if claude["name"] != "worknew-jobs" or not re.fullmatch(r"\d+\.\d+\.\d+", claude["version"]):
         raise ContractError("Invalid package identity/version")
     for manifest in manifests:
-        if manifest.get("skills") != "./skills/" or any(k in manifest for k in ("mcpServers", "apps", "hooks")):
-            raise ContractError("Source manifests must remain endpoint-independent and use shared skills")
+        if manifest.get("skills") != "./skills/" or manifest.get("mcpServers") != "./.mcp.json" or any(k in manifest for k in ("apps", "hooks")):
+            raise ContractError("Source manifests must declare the public MCP config and shared skills")
+    mcp = json.loads(checked_file(root, ".mcp.json").read_text())
+    if mcp != {"mcpServers": {"worknew": {"type": "http", "url": public_endpoint(root)}}}:
+        raise ContractError("Source MCP configuration must declare only the canonical public service")
+    checked_file(root, "LICENSE")
+    if len(checked_file(root, "docs/package-readme.md").read_text().split()) < 40:
+        raise ContractError("The packaged README must contain at least 40 words")
     ui = chatgpt["interface"]
     if ui["displayName"] != claude["displayName"]:
         raise ContractError("Platform display names disagree")
@@ -82,6 +90,19 @@ def validate_sources(root=ROOT):
         raise ContractError("Invalid starter prompts")
     if len(set(prompts)) != len(prompts):
         raise ContractError("Duplicate starter prompts")
+    for key in ("websiteURL", "supportURL", "privacyPolicyURL", "termsOfServiceURL"):
+        value = ui.get(key, "")
+        parsed = urlsplit(value)
+        if len(value) > 1024 or parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            raise ContractError(f"Invalid public listing URL: {key}")
+    review = chatgpt["extensions"]["com.openai"].get("review", {})
+    for kind, count in (("positive", 5), ("negative", 3)):
+        cases = review.get("test_cases", {}).get(kind, [])
+        if len(cases) != count:
+            raise ContractError(f"Review requires {count} {kind} cases")
+        required = ("description", "prompt", "expected_behavior") + (("tools_triggered",) if kind == "positive" else ())
+        if any(not isinstance(case.get(key), str) or not case[key].strip() for case in cases for key in required):
+            raise ContractError("Review cases are incomplete")
     onboarding = chatgpt["extensions"]["com.openai"]["onboardingSkill"]
     if onboarding != "./skills/get-started/SKILL.md":
         raise ContractError("Onboarding must reference the packaged get-started skill")
@@ -141,16 +162,19 @@ def build(root=ROOT, endpoint=None, development=False, skills_only=False):
         common = {f"skills/{name}/SKILL.md": checked_file(root, f"skills/{name}/SKILL.md").read_bytes()
                   for name in ("get-started", "search-jobs")}
         common.update({path: checked_file(root, path).read_bytes() for path in assets})
-        common["README.md"] = ("# WorkNew\n\nRun get-started after installing.\n\n"
-                               + ("Configured for a remote MCP server. Backend availability is not verified by this build.\n"
-                                  if endpoint else "Skills-only package: live search is not connected.\n")
-                               + "No WorkNew login required. Applications are not supported.\n").encode()
+        common["README.md"] = checked_file(root, "docs/package-readme.md").read_bytes()
+        if not endpoint:
+            common["README.md"] = ("**Skills-only pakket: live zoeken is niet aangesloten. Installeer het verbonden pakket voor zoeken.**\n\n").encode() + common["README.md"]
+        common["LICENSE"] = checked_file(root, "LICENSE").read_bytes()
         portable = {k: copy.deepcopy(chatgpt[k]) for k in
-                    ("name", "version", "description", "author", "homepage", "repository", "keywords")}
+                    ("name", "version", "description", "author", "homepage", "repository", "license", "keywords")}
         portable["$schema"] = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
-        portable["extensions"] = {"com.openai": {"interface": chatgpt["interface"],
-                                  "onboardingSkill": "./skills/get-started/SKILL.md"}}
+        portable["extensions"] = copy.deepcopy(chatgpt["extensions"])
+        portable["extensions"]["com.openai"]["interface"] = copy.deepcopy(chatgpt["interface"])
         claude = copy.deepcopy(claude)
+        claude.pop("mcpServers", None)
+        if not endpoint:
+            portable["extensions"]["com.openai"].pop("review", None)
         variants = {"claude": {".claude-plugin/plugin.json": json_bytes(claude)},
                     "chatgpt": {"plugin.json": json_bytes(portable)}}
         if endpoint:
@@ -192,3 +216,44 @@ def build(root=ROOT, endpoint=None, development=False, skills_only=False):
             shutil.rmtree(target)
         staging.rename(target)
     return target
+
+
+def publication_gaps(root=ROOT):
+    """Report locally detectable submission gaps, without claiming portal acceptance."""
+    _, chatgpt, _ = validate_sources(root)
+    gaps = []
+    ui = chatgpt["interface"]
+    for key in ("logo", "composerIcon"):
+        relative = ui.get(key)
+        if not relative:
+            gaps.append(f"Missing listing image: {key}")
+            continue
+        path = checked_file(root, relative)
+        if path.suffix.lower() == ".svg":
+            try:
+                text = path.read_text()
+                if "<!DOCTYPE" in text or "<!ENTITY" in text:
+                    raise ValueError("External XML declarations are not supported")
+                svg = ET.fromstring(text)
+                if svg.tag != "{http://www.w3.org/2000/svg}svg":
+                    raise ValueError("Not an SVG")
+                # Prefer explicit display dimensions, falling back to the viewBox.
+                if "width" in svg.attrib and "height" in svg.attrib:
+                    width, height = float(svg.attrib["width"]), float(svg.attrib["height"])
+                else:
+                    _, _, width, height = map(float, svg.attrib["viewBox"].replace(",", " ").split())
+                if not all(math.isfinite(v) for v in (width, height)) or width != height or width < 48:
+                    raise ValueError("Image must be square and at least 48 by 48")
+            except (ET.ParseError, ValueError, KeyError):
+                gaps.append(f"Invalid square SVG dimensions or XML: {key}")
+        else:
+            gaps.append(f"Raster image requires a separate dimension/format check: {key}")
+    review = chatgpt["extensions"]["com.openai"]["review"]
+    recording = review.get("demo_recording_url", "")
+    parsed = urlsplit(recording)
+    if (not recording or parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
+            or parsed.hostname in {"example.com", "example.org", "example.net"}):
+        gaps.append("Missing reviewer-accessible HTTPS video recording URL")
+    if not chatgpt["extensions"]["com.openai"].get("publication", {}).get("release_notes", "").strip():
+        gaps.append("Missing release notes")
+    return gaps

@@ -1,26 +1,13 @@
-# Merkbestanden en links
+# WorkNew-merkbestanden
 
-Inventaris op 27 oktober 2026. Deze map bevat nog geen goedgekeurde afbeeldingen. De manifests verwijzen daarom nog niet naar een logo of icoon. Een tekstuele merkvermelding is geen vervanging voor een goedgekeurd merkbestand.
+`worknew-icon.svg` is het officiële vierkante WorkNew-beeldmerk, opgehaald uit de faviconverwijzing op https://worknew.co/mcp. Het gedownloade bestand komt byte-voor-byte overeen met `assets/images/worknew-favicon.svg` in het bestaande WorkNew WordPress-theme.
 
-| Onderdeel | Beschikbaar / nog nodig |
-| --- | --- |
-| Naam | WorkNew; pakketnaam `worknew-jobs` |
-| Positionering | Opdrachten voor digital consultants; Nederlandse primaire doelgroep |
-| Website | `https://www.worknew.co` |
-| Supportcontact | `support@worknew.co`, zichtbaar op de publieke site; nog een geschikte HTTPS-supportpagina vaststellen |
-| Privacy en voorwaarden | De site toont beide footerlinks; exacte bestemmingen, inhoud en dekking van deze plugin nog verifiëren |
-| Goedgekeurd bronlogo | Niet aanwezig in deze repository; origineel SVG of ander officieel bronbestand aanleveren/terugvinden |
-| Vierkant directorylogo | Ontbreekt; maak een goedgekeurde export van het officiële merk |
-| Composer-icoon | Ontbreekt; herkenbaar vierkant merkteken, leesbaar op klein formaat |
-| Merkkleuren | Nog niet vastgesteld; neem waarden over uit goedgekeurde WorkNew-branding |
-| Demo en screenshots | Nog niet gemaakt; pas na werkende zoekintegratie |
+- Origineel: 32 × 32, SVG met vectorpaden en een blauwe achtergrond.
+- SHA-256 van het origineel: `32807377c3f6ab90bb0fee09c55ec65dc48f448f8c88e68f6e9c03de9588001b`.
+- Bron: https://assets.softr-files.com/applications/d53daaa2-7d9e-4fde-a57b-b6318324bd36/assets/8e7baa85-dac5-45d6-9246-096c1b6dcfb3.svg
+- Opgehaald op 2 november 2026.
+- Geen nieuw merkbeeld ontworpen. De artwork blijft eigendom van de rechthebbende.
 
-De [publieke WorkNew-site](https://www.worknew.co) is de bron voor de naam, doelgroep, supportvermelding en aanwezige footerlinks. Er is geen bruikbaar goedgekeurd logo-exportbestand vastgesteld tijdens deze inventarisatie. De privacy- en voorwaardeninhoud is niet juridisch beoordeeld.
+Met expliciete toestemming van de gebruiker zijn alleen de root-attributen width en height gewijzigd naar 512 × 512. De viewBox, vectorpaden, kleuren en overige bytes zijn ongewijzigd. De SVG voldoet daarmee aan de minimumafmetingen van 48 × 48. SHA-256 van het aangepaste bestand: `adf36d6d4670437bce5957ce1693972fb327f326f188dccc3e33d0e6ad0c12b6`.
 
-## Exports voor publicatie
-
-Gebruik bij voorkeur een vierkante PNG-export van 512 × 512 en bewaar het officiële vectororigineel. Dit is een werkafspraak voor deze plugin, geen verplicht platformformaat. Controleer lichte en donkere achtergronden en behoud de officiële verhoudingen; rek een breed woordmerk niet uit tot vierkant.
-
-OpenAI vraagt een vierkant `logo` en `composerIcon`: PNG/JPEG/WebP/SVG, maximaal 5 MiB; raster 48–4096 pixels per zijde. Voor SVG gelden valide XML en vierkante numerieke afmetingen. Claude ondersteunt een lokale `icon`-verwijzing; controleer de directoryvoorwaarden bij indiening. [OpenAI-afbeeldingsvoorwaarden](https://developers.openai.com/plugins/deploy/submission-errors), [Claude-manifest](https://code.claude.com/docs/en/plugins-reference).
-
-Voeg pas manifestpaden toe nadat de bestanden bestaan. Leg bij elk definitief asset de oorspronkelijke bron en de goedgekeurde variant vast. Voeg geen gegenereerd vervangingslogo of willekeurige kleur toe. Optionele merkkleuren en eventuele custom-UI-screenshots volgen de actuele platformvoorwaarden.
+Dezelfde afbeelding wordt gebruikt voor het directorylogo en het composer-icoon. Bekijk beide op lichte en donkere achtergronden nadat de definitieve export is gemaakt. Dark variants en custom-UI-screenshots zijn niet nodig voor deze release.

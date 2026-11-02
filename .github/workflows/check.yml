@@ -20,3 +20,14 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - run: python -m worknew_plugins build --skills-only
       - run: python -m worknew_plugins build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npx --yes @anthropic-ai/claude-code@2.1.316 plugin validate . --strict
+      - run: npx --yes @anthropic-ai/claude-code@2.1.316 plugin validate dist/connected/claude --strict
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worknew-connected-packages
+          path: |
+            dist/connected/*.zip
+            dist/connected/build-report.json

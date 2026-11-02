@@ -25,25 +25,25 @@ Uitgevoerd met de expliciete clientheader `User-Agent: WorkNew-MCP-DeploymentChe
 
 De rate-limitbindings zijn via de provider teruggelezen en 429-afhandeling is lokaal getest. Er is geen productiebelastingstest of geforceerde backendstoring uitgevoerd. Deze controles vervangen geen echte Claude-/ChatGPT-hosttest.
 
-## Openstaande toegangsstap
+## Cloudflare-toegang afgerond
 
-Cloudflare Browser Integrity Check weigert de standaard Python-client met HTTP 403 / error 1010. Een expliciet geïdentificeerde WorkNew-testclient bereikt wel de backend. Dat is geen bewijs dat alle Claude-/ChatGPT-clients toegang hebben. De Cloudflare-verbinding geeft bij het lezen van firewallregels `Insufficient scope`.
-
-Ook na herautorisatie is deze fout opnieuw vastgesteld. Gebruik hiervoor de **Cloudflare API MCP** (`https://mcp.cloudflare.com/mcp`, verbinding `cloudflare`), die firewallregels ondersteunt. De afzonderlijke Bindings-, Builds- en Observability-verbindingen bieden die functie niet. Controleer bij autorisatie via **Edit permissions** de benodigde WAF-/regelrechten; alleen opnieuw inloggen verleent niet automatisch de optionele rechten. Zie [Cloudflare OAuth-permissies](https://developers.cloudflare.com/changelog/post/2026-08-22-wrangler-mcp-optional-oauth-scopes/).
-
-Voeg in Cloudflare bij **worknew.co → Security → Custom rules** een beperkte uitzondering toe, of verbind de Cloudflare-integratie opnieuw met rechten voor deze regels:
+Op 2 november 2026 is de standaard Python-client eerst opnieuw met HTTP 403 geweigerd. Na expliciete goedkeuring is via de Cloudflare API MCP een custom rule aangemaakt en teruggelezen voor uitsluitend:
 
 ```text
 (http.host eq "mcp.worknew.co" and http.request.uri.path eq "/v1/mcp")
 ```
 
-Actie: **Skip**, uitsluitend **Browser Integrity Check**. Geen overige regels, WAF-fases of rate limits overslaan. Zet logging van overeenkomende verzoeken uit. Cloudflare ondersteunt deze [gerichte skipactie](https://developers.cloudflare.com/waf/custom-rules/skip/options/).
+De actieve regel `worknew_public_mcp_skip_bic` gebruikt **Skip** met uitsluitend `products: ["bic"]` en `logging.enabled: false`. Overige regels, WAF-fases en rate limits worden niet overgeslagen. De Worker-rate-limitbindings en uitgeschakelde workers.dev-/preview-URLs zijn opnieuw via de provider bevestigd. Cloudflare beschrijft deze [gerichte skipactie](https://developers.cloudflare.com/waf/custom-rules/skip/options/).
 
-Voer daarna zonder gewijzigde clientheaders uit:
+Daarna slaagde de ongewijzigde checker, zonder aangepaste User-Agent of gebruikersauthenticatie:
 
 ```sh
 .venv/bin/python -m worknew_plugins check-backend
 ```
+
+Resultaat: protocol `2025-11-25`, discovery en contractvalidatie van `search_jobs`, 3 resultaten, 38 matches en `hasMore: true`. De aantallen zijn een momentopname. Deze controle bewijst de publieke MCP-verbinding; installatie en onboarding in de echte hosts blijven afzonderlijke acceptatiestappen.
+
+## Resterende platformacceptatie
 
 Controleer vervolgens installatie, onboarding en zoeken in Claude én ChatGPT. Het servicecontract blijft `deploymentStatus: not-verified` totdat de productieacceptatie compleet is. Een buildreport blijft `backendVerified: false`, omdat bouwen zelf geen netwerkcontrole uitvoert.
 
