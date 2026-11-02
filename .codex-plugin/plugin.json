@@ -1,0 +1,38 @@
+{
+  "name": "worknew-jobs",
+  "version": "0.3.0",
+  "description": "Verken je opdrachtwensen met of zonder cv en zoek via een aangesloten WorkNew-zoekverbinding.",
+  "author": {
+    "name": "WorkNew"
+  },
+  "homepage": "https://www.worknew.co",
+  "repository": "https://github.com/CreateNewCo/worknewjobs-plugin",
+  "keywords": [
+    "worknew",
+    "opdrachten",
+    "digital-consultants",
+    "werk"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "WorkNew",
+    "shortDescription": "Vind jouw volgende opdracht",
+    "longDescription": "Verken je volgende opdracht met WorkNew. Deel vrijwillig je cv of vertel welke rollen je zoekt. Met een aangesloten zoekverbinding vind je openbare WorkNew-opdrachten en links naar de opdrachtpagina’s. Je hoeft niet bij WorkNew in te loggen. Reageren via de plugin is nog niet beschikbaar.",
+    "developerName": "WorkNew",
+    "category": "Productivity",
+    "capabilities": [
+      "Opdrachtwensen verkennen"
+    ],
+    "websiteURL": "https://www.worknew.co",
+    "defaultPrompt": [
+      "Start met get-started en help me mijn volgende opdracht te vinden.",
+      "Ik deel liever geen cv. Help me bepalen welke opdrachten bij mijn wensen passen.",
+      "Gebruik mijn cv om relevante rollen en zoekvoorkeuren te bepalen."
+    ]
+  },
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/get-started/SKILL.md"
+    }
+  }
+}

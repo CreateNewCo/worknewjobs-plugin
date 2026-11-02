@@ -1,0 +1,19 @@
+{
+  "contractVersion": "2.0.0",
+  "endpoint": "https://mcp.worknew.co/v1/mcp",
+  "minimumCompatibilityProtocol": "2025-11-25",
+  "tool": "search_jobs",
+  "transport": "streamable-http",
+  "userAuthentication": "none",
+  "visibility": "public-open-jobs-only",
+  "profileStorage": false,
+  "applications": false,
+  "safeguards": {
+    "dedicatedAuthenticationBoundary": true,
+    "rateLimitingRequired": true,
+    "boundedRequestsRequired": true,
+    "publicOutputAllowlistRequired": true
+  },
+  "resultContent": "structuredContent plus one text block containing the same JSON",
+  "deploymentStatus": "not-verified"
+}

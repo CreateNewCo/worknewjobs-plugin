@@ -1,0 +1,37 @@
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+!.env.*.example
+.secrets/
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependencies, generated packages, caches, and logs
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+dist/
+build/
+coverage/
+.cache/
+*.log
+*.zip
+
+# Keep personal documents and local review artifacts in these directories
+.local/
+local-data/
+private/
+cvs/
+test-artifacts/
+
+# OS and editor-local state; the shared .code-workspace stays tracked
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/*.local.json

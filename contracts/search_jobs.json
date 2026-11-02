@@ -1,0 +1,267 @@
+{
+  "name": "search_jobs",
+  "title": "Zoek opdrachten op WorkNew",
+  "description": "Zoek openbare, open WorkNew-opdrachten op roltermen en ondersteunde filters. Geen login of cv-upload nodig. Geeft publieke jobgegevens en WorkNew-links terug. Geen sollicitaties of profielopslag. Een lege resultatenlijst is een succesvolle zoekopdracht zonder matches.",
+  "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "openWorldHint": false,
+    "idempotentHint": true
+  },
+  "inputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "query": {
+        "type": "string",
+        "maxLength": 500,
+        "default": "",
+        "description": "Korte roltermen of vaardigheden; geen cv-tekst, naam of contactgegevens."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 0,
+        "default": 0
+      },
+      "category": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100,
+        "default": "all",
+        "description": "Bestaande backendcategorie of all. Onbekende waarden worden door de backend geweigerd."
+      },
+      "industry": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100,
+        "default": "all",
+        "description": "Bestaande WorkNew-branche of all. Onbekende waarden worden door de backend geweigerd."
+      },
+      "exclusiveOnly": {
+        "type": "boolean",
+        "default": false
+      },
+      "dateRange": {
+        "type": "string",
+        "enum": [
+          "all",
+          "24h",
+          "week",
+          "month"
+        ],
+        "default": "all"
+      },
+      "hoursPerWeek": {
+        "type": "string",
+        "enum": [
+          "all",
+          "0-16",
+          "16-24",
+          "24-32",
+          "32-40"
+        ],
+        "default": "all"
+      },
+      "payRate": {
+        "type": "string",
+        "enum": [
+          "all",
+          "0-50",
+          "50-75",
+          "75-100",
+          "100+"
+        ],
+        "default": "all",
+        "description": "Tariefgroep op basis van minimumtarief; geen automatische omzetting van salaris naar uurtarief."
+      },
+      "duration": {
+        "type": "string",
+        "enum": [
+          "all",
+          "0-3",
+          "3-6",
+          "6-12",
+          "12+"
+        ],
+        "default": "all",
+        "description": "Opdrachtduur in maanden."
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "results",
+      "pagination"
+    ],
+    "properties": {
+      "results": {
+        "type": "array",
+        "maxItems": 100,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "fields"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fields": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "client",
+                "location",
+                "description",
+                "requirements",
+                "workMode",
+                "rateLabel",
+                "typeOfRateOfPay",
+                "durationType",
+                "url",
+                "hoursPerWeek",
+                "rateOfPayMin",
+                "rateOfPayMax",
+                "duration",
+                "applicationDeadline",
+                "clientLogo"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string"
+                },
+                "client": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "requirements": {
+                  "type": "string"
+                },
+                "workMode": {
+                  "type": "string"
+                },
+                "rateLabel": {
+                  "type": "string"
+                },
+                "typeOfRateOfPay": {
+                  "type": "string"
+                },
+                "durationType": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Canonieke HTTPS WorkNew-opdrachtlink uit de backend, of lege string indien afwezig/ongeldig."
+                },
+                "hoursPerWeek": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "rateOfPayMin": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "rateOfPayMax": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "duration": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "applicationDeadline": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "clientLogo": {
+                  "type": "array",
+                  "maxItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "url"
+                    ],
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "pattern": "^https://"
+                      },
+                      "filename": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "pagination": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offset",
+          "limit",
+          "total",
+          "hasMore",
+          "nextOffset"
+        ],
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextOffset": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
