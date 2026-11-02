@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "worknew": {
+      "type": "http",
+      "url": "https://mcp.worknew.co/v1/mcp"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "WorkNew",
+  "one_liner": "Vind openbare opdrachten voor digital consultants vanuit je gesprek.",
+  "description": "Vind openbare opdrachten voor digital consultants op WorkNew. Vertel welke rollen je zoekt of deel vrijwillig een cv in je gesprek. Zoek en vergelijk opdrachten op basis van je wensen, met links naar de actuele opdrachtpagina’s. Voor zoeken heb je geen WorkNew-account nodig. De plugin verstuurt geen cv’s of sollicitaties en maakt geen profiel aan. Beschikbare informatie over locatie en thuiswerken kan worden vergeleken; dit zijn geen afzonderlijke zoekfilters.",
+  "server_url": "https://mcp.worknew.co/v1/mcp",
+  "authentication": "none",
+  "documentation_url": "https://worknew.co/mcp",
+  "privacy_policy_url": "https://worknew.co/legal/privacy",
+  "support_contact": "support@worknew.co",
+  "icon": "../assets/worknew-icon.svg",
+  "company_name": "CreateNew Work B.V.",
+  "company_website": "https://worknew.co",
+  "suggested_slug": "worknew",
+  "use_cases": [
+    "Zoek openbare opdrachten met roltermen en ondersteunde filters.",
+    "Vergelijk beschikbare uren, vergoeding en looptijd.",
+    "Open de teruggegeven WorkNew-link om zelf verder te gaan."
+  ],
+  "reviewer_access": "Geen account of credentials nodig. Voeg de server als custom connector toe en voer search_jobs uit. Gebruik de reviewcases uit de pluginmanifest.",
+  "read_only": true,
+  "notes": "Prepared listing values, not a platform schema or submitted form. Confirm available category and slug in the portal. No custom MCP UI."
+}

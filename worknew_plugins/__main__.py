@@ -9,7 +9,7 @@ from jsonschema.exceptions import SchemaError
 
 from .contract import ContractError, public_endpoint
 from .mcp import Probe
-from .package import build, validate_sources
+from .package import build, validate_sources, publication_gaps
 from .audit import audit_repository
 
 
@@ -19,6 +19,7 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("validate", help="Check source metadata, skills and contracts")
     commands.add_parser("audit", help="Scan publishable files for secret patterns and private route references")
+    commands.add_parser("check-publication", help="Check local listing assets and review materials; does not verify portal acceptance")
     builder = commands.add_parser("build", help="Create deterministic platform folders and ZIPs")
     mode = builder.add_mutually_exclusive_group()
     mode.add_argument("--skills-only", action="store_true", help="Build without a connection")
@@ -35,6 +36,13 @@ def main():
             print("PASS: source manifests, skills, assets and search schemas")
         elif args.command == "audit":
             print(f"PASS: publication audit of {audit_repository()} files (pattern scan, not a security guarantee)")
+        elif args.command == "check-publication":
+            gaps = publication_gaps()
+            if gaps:
+                for gap in gaps:
+                    print(f"MISSING: {gap}")
+                return 1
+            print("PASS: local publication metadata. Host tests, identity/domain verification and portal scans still require evidence.")
         elif args.command == "build":
             print(build(endpoint=args.mcp_url, development=args.development, skills_only=args.skills_only))
             print("Built packages; backend availability and directory readiness are not verified.")

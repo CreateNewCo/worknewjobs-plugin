@@ -113,7 +113,7 @@ class Probe:
         validate_arguments(arguments, tool)
         initialized = self.post("initialize", {
             "protocolVersion": PROTOCOL, "capabilities": {},
-            "clientInfo": {"name": "worknew-plugin-check", "version": "0.3.0"}})
+            "clientInfo": {"name": "worknew-plugin-check", "version": "0.4.0"}})
         if initialized.get("protocolVersion") != PROTOCOL:
             raise ContractError("Backend must support MCP 2025-11-25 for this compatibility probe")
         capabilities = initialized.get("capabilities")

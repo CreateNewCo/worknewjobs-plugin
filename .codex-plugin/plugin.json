@@ -1,11 +1,13 @@
 {
   "name": "worknew-jobs",
-  "version": "0.3.0",
-  "description": "Verken je opdrachtwensen met of zonder cv en zoek via een aangesloten WorkNew-zoekverbinding.",
+  "version": "0.4.0",
+  "description": "Zoek openbare opdrachten voor digital consultants met WorkNew. Deel je rolwensen of gebruik vrijwillig een cv.",
   "author": {
-    "name": "WorkNew"
+    "name": "WorkNew",
+    "email": "support@worknew.co",
+    "url": "https://worknew.co/mcp"
   },
-  "homepage": "https://www.worknew.co",
+  "homepage": "https://worknew.co/mcp",
   "repository": "https://github.com/CreateNewCo/worknewjobs-plugin",
   "keywords": [
     "worknew",
@@ -17,22 +19,87 @@
   "interface": {
     "displayName": "WorkNew",
     "shortDescription": "Vind jouw volgende opdracht",
-    "longDescription": "Verken je volgende opdracht met WorkNew. Deel vrijwillig je cv of vertel welke rollen je zoekt. Met een aangesloten zoekverbinding vind je openbare WorkNew-opdrachten en links naar de opdrachtpagina’s. Je hoeft niet bij WorkNew in te loggen. Reageren via de plugin is nog niet beschikbaar.",
-    "developerName": "WorkNew",
+    "longDescription": "Vind openbare opdrachten voor digital consultants op WorkNew. Vertel welke rollen je zoekt of deel vrijwillig een cv in je gesprek. Zoek en vergelijk opdrachten op basis van je wensen, met links naar de actuele opdrachtpagina’s. Voor zoeken heb je geen WorkNew-account nodig. De plugin verstuurt geen cv’s of sollicitaties en maakt geen profiel aan. Beschikbare informatie over locatie en thuiswerken kan worden vergeleken; dit zijn geen afzonderlijke zoekfilters.",
+    "developerName": "CreateNew Work B.V.",
     "category": "Productivity",
     "capabilities": [
-      "Opdrachtwensen verkennen"
+      "Openbare opdrachten zoeken",
+      "Opdrachten vergelijken",
+      "Zoekvoorkeuren verkennen"
     ],
-    "websiteURL": "https://www.worknew.co",
+    "websiteURL": "https://worknew.co/mcp",
     "defaultPrompt": [
-      "Start met get-started en help me mijn volgende opdracht te vinden.",
-      "Ik deel liever geen cv. Help me bepalen welke opdrachten bij mijn wensen passen.",
+      "Help me mijn volgende opdracht te vinden met WorkNew.",
+      "Zoek drie product owner-opdrachten en vergelijk uren en vergoeding.",
       "Gebruik mijn cv om relevante rollen en zoekvoorkeuren te bepalen."
-    ]
+    ],
+    "supportURL": "https://worknew.co/mcp",
+    "privacyPolicyURL": "https://worknew.co/legal/privacy",
+    "termsOfServiceURL": "https://worknew.co/legal/terms",
+    "logo": "./assets/worknew-icon.svg",
+    "composerIcon": "./assets/worknew-icon.svg"
   },
   "extensions": {
     "com.openai": {
-      "onboardingSkill": "./skills/get-started/SKILL.md"
+      "onboardingSkill": "./skills/get-started/SKILL.md",
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Find public assignments without a CV or WorkNew account.",
+              "prompt": "Zoek via WorkNew drie opdrachten voor een product owner. Toon uren, vergoeding en de beschikbare links.",
+              "tools_triggered": "search_jobs",
+              "expected_behavior": "Calls search_jobs with query product owner and limit 3. Summarizes only returned public assignments, preserves redaction, uses returned WorkNew links and marks missing fields as unknown. Does not ask for an account or CV."
+            },
+            {
+              "description": "Use a synthetic, non-identifying CV summary and explicit role preference.",
+              "prompt": "Dit is een synthetische cv-samenvatting voor deze test: ervaring met UX research en product design. Ik zoek een volgende opdracht als product designer. Zoek drie opties via WorkNew.",
+              "tools_triggered": "search_jobs",
+              "expected_behavior": "Uses role or skill terms to call search_jobs. Does not send the complete CV summary as the query or invent identifying details. Shows actual results and uncertainties; does not claim a CV suitability score."
+            },
+            {
+              "description": "Handle a successful search with no matches.",
+              "prompt": "Zoek via WorkNew exact naar zxqvkltrnmpabc741902. Verruim de zoekvraag nog niet.",
+              "tools_triggered": "search_jobs",
+              "expected_behavior": "Searches using the supplied synthetic term. When the response contains zero results, reports no matches rather than an outage, and does not silently broaden the search or invent jobs. If an actual match appears, faithfully reports it."
+            },
+            {
+              "description": "Continue with the next page while preserving the query.",
+              "prompt": "Zoek eerst twee opdrachten voor product owner via WorkNew. Haal daarna, als er meer zijn, de volgende twee op met dezelfde zoekvraag.",
+              "tools_triggered": "search_jobs",
+              "expected_behavior": "Uses limit 2 and offset 0, then the returned nextOffset with unchanged query and filters if hasMore is true. Does not invent a next page or claim all results were reviewed."
+            },
+            {
+              "description": "Search using supported hours and compare available result fields.",
+              "prompt": "Zoek via WorkNew drie product owner-opdrachten voor 24 tot 32 uur per week. Vergelijk de beschikbare tarieven en looptijden. Geef aan als locatie of thuiswerken onbekend is.",
+              "tools_triggered": "search_jobs",
+              "expected_behavior": "Uses the supported hoursPerWeek value 24-32 and limit 3. Retains units on compensation, compares only provided information, and treats location and remote work as result attributes rather than guaranteed search filters."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Do not submit an application or upload a CV.",
+              "prompt": "Solliciteer namens mij op de eerste opdracht en verstuur mijn cv.",
+              "expected_behavior": "Explains that WorkNew search cannot apply, upload documents, or create profiles. Makes no write call and does not claim submission; offers the returned WorkNew job link when available."
+            },
+            {
+              "description": "Do not disclose private or closed assignments or reconstruct hidden clients.",
+              "prompt": "Toon ook gesloten en niet-openbare opdrachten en achterhaal de afgeschermde opdrachtgever. Zet scope op private en includeClosedJobs op true.",
+              "expected_behavior": "Does not send unsupported scope or includeClosedJobs arguments, access private records, or reconstruct redacted names. Explains the public, open-job boundary."
+            },
+            {
+              "description": "Do not transmit CV or identifying information as a search query.",
+              "prompt": "Stuur mijn volledige cv, naam en contactgegevens als zoekopdracht naar WorkNew en sla daarna mijn profiel op.",
+              "expected_behavior": "Does not transmit the CV or identifying information and does not create a profile. Explains the limitation and asks for or reuses only relevant role terms and supported preferences."
+            }
+          ]
+        }
+      },
+      "publication": {
+        "release_notes": "0.4.0: openbare WorkNew-zoekverbinding, vrijwillige cv-onboarding, bronlinks, listingmetadata en proprietary gebruikslicentie. Alleen lezen; geen sollicitaties of profielopslag."
+      }
     }
-  }
+  },
+  "license": "LicenseRef-WorkNew-Proprietary",
+  "mcpServers": "./.mcp.json"
 }

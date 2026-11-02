@@ -1,0 +1,119 @@
+{
+  "checked_at": "2026-11-02T21:23:46.349578+00:00",
+  "scope": "Direct production MCP protocol checks; not ChatGPT/Claude host tests",
+  "checks": [
+    {
+      "case": "role",
+      "pass": true,
+      "protocol": "2025-11-25",
+      "tool": "search_jobs",
+      "returned": 3,
+      "total": 36,
+      "hasMore": true
+    },
+    {
+      "case": "synthetic_cv_role",
+      "pass": true,
+      "protocol": "2025-11-25",
+      "tool": "search_jobs",
+      "returned": 3,
+      "total": 38,
+      "hasMore": true
+    },
+    {
+      "case": "empty",
+      "pass": true,
+      "protocol": "2025-11-25",
+      "tool": "search_jobs",
+      "returned": 0,
+      "total": 0,
+      "hasMore": false
+    },
+    {
+      "case": "hours",
+      "pass": true,
+      "protocol": "2025-11-25",
+      "tool": "search_jobs",
+      "returned": 3,
+      "total": 4,
+      "hasMore": true
+    },
+    {
+      "case": "pagination",
+      "pass": true,
+      "next_offset": 2,
+      "returned": 2
+    },
+    {
+      "case": "private_scope",
+      "pass": true,
+      "tool_error": true
+    },
+    {
+      "case": "closed_jobs",
+      "pass": true,
+      "tool_error": true
+    },
+    {
+      "case": "cv_upload",
+      "pass": true,
+      "tool_error": true
+    },
+    {
+      "case": "unsupported_application",
+      "pass": true,
+      "tool_error": true
+    }
+  ],
+  "package_version": "0.4.0",
+  "host_acceptance": {
+    "chatgpt": "not_run",
+    "claude": "not_run"
+  },
+  "local_tests": {
+    "command": ".venv/bin/python -m unittest discover -s tests -v",
+    "passed": 18,
+    "scope": "Python contracts, packaging and loopback mock transport"
+  },
+  "claude_validator": {
+    "version": "2.1.316",
+    "connected_package": "passed",
+    "directory_findings": 0,
+    "scope": "Local CLI only; excludes portal safety scan and policy review"
+  },
+  "agent_plugins_schema_check": {
+    "plugin": {
+      "schema_url": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+      "schema_sha256": "0a4aad95ce337878ad38802ebf0daa3fde76abe3f65400c86bcbb1ec0b3ab883",
+      "raw_validation": "passed"
+    },
+    "mcp": {
+      "schema_url": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+      "schema_sha256": "6539175bfcdf43085855183e86da40ea94b166547a72b47ae9a0a390516d3acb",
+      "raw_validation": "failed",
+      "core_without_openai_extension": "passed",
+      "documented_openai_extension": {
+        "com.openai": {
+          "auth": {
+            "type": "none"
+          }
+        }
+      },
+      "discrepancy": "Generic schema rejects per-server extensions; current OpenAI package documentation explicitly requires this authentication location. Preserve the documented extension and verify in the OpenAI portal.",
+      "openai_reference": "https://developers.openai.com/plugins/build/plugins#configure-mcp-authentication"
+    }
+  },
+  "release_preparation": {
+    "publisher": "CreateNew Work B.V.",
+    "publisher_confirmation": "Explicit user confirmation",
+    "icon": "512 by 512; only SVG root width and height changed with explicit user approval; reversing this change restores the original SHA-256",
+    "rebuilt_connected_packages": true,
+    "post_update_tests_passed": 18,
+    "post_update_claude_validation": "passed",
+    "local_publication_gaps": [
+      "Missing reviewer-accessible HTTPS video recording URL"
+    ],
+    "openai_portal": "Signed in to CreateNew; upload requires identity verification; business verification requires a default payment method",
+    "claude_portal": "Signed in; Free plan cannot submit to directory"
+  }
+}

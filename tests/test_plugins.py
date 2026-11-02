@@ -14,7 +14,7 @@ from pathlib import Path
 from worknew_plugins.contract import ROOT, ContractError, load_contract, validate_arguments, validate_result, public_endpoint
 from worknew_plugins.audit import audit_bytes
 from worknew_plugins.mcp import Probe
-from worknew_plugins.package import build, validate_endpoint, validate_sources
+from worknew_plugins.package import build, validate_endpoint, validate_sources, publication_gaps
 
 
 def sample_result(arguments=None, total=1):
@@ -161,9 +161,10 @@ class PackageTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name).resolve()
-        for name in (".claude-plugin", ".codex-plugin", "skills", "contracts", "docs"):
+        for name in (".claude-plugin", ".codex-plugin", "skills", "contracts", "docs", "assets"):
             shutil.copytree(ROOT / name, self.root / name)
-        (self.root / "assets").mkdir()
+        for name in (".mcp.json", "LICENSE"):
+            shutil.copyfile(ROOT / name, self.root / name)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -180,7 +181,8 @@ class PackageTests(unittest.TestCase):
         self.assertEqual((self.root / "dist/unrelated.txt").read_text(), "preserve")
         for path in target.glob("*.zip"):
             with zipfile.ZipFile(path) as archive:
-                self.assertEqual(len(archive.namelist()), 4)
+                self.assertIn("LICENSE", archive.namelist())
+                self.assertIn("assets/worknew-icon.svg", archive.namelist())
                 self.assertNotIn(".env", archive.namelist())
                 self.assertNotIn("skills/get-started/cv.pdf", archive.namelist())
                 self.assertNotIn(".mcp.json", archive.namelist())
@@ -199,7 +201,41 @@ class PackageTests(unittest.TestCase):
         self.assertFalse(json.loads((target / "build-report.json").read_text())["backendVerified"])
         portable = json.loads((target / "chatgpt/plugin.json").read_text())
         self.assertEqual(portable["extensions"]["com.openai"]["onboardingSkill"], "./skills/get-started/SKILL.md")
-        self.assertNotIn("mcpServers", json.loads((self.root / ".claude-plugin/plugin.json").read_text()))
+        self.assertEqual(json.loads((self.root / ".claude-plugin/plugin.json").read_text())["mcpServers"], "./.mcp.json")
+        self.assertEqual(portable["license"], "LicenseRef-WorkNew-Proprietary")
+        self.assertEqual(len(portable["extensions"]["com.openai"]["review"]["test_cases"]["positive"]), 5)
+        self.assertEqual(len(portable["extensions"]["com.openai"]["review"]["test_cases"]["negative"]), 3)
+        self.assertIn("release_notes", portable["extensions"]["com.openai"]["publication"])
+        self.assertGreaterEqual(len((target / "claude/README.md").read_text().split()), 40)
+
+    def test_skills_only_does_not_declare_a_server_or_remote_review(self):
+        target = build(self.root, skills_only=True)
+        claude = json.loads((target / "claude/.claude-plugin/plugin.json").read_text())
+        portable = json.loads((target / "chatgpt/plugin.json").read_text())
+        self.assertNotIn("mcpServers", claude)
+        self.assertNotIn("review", portable["extensions"]["com.openai"])
+
+    def test_source_cannot_add_another_server_or_credentials(self):
+        path = self.root / ".mcp.json"
+        manifest = json.loads(path.read_text())
+        manifest["mcpServers"]["worknew"]["headers"] = {"Authorization": "synthetic-secret"}
+        path.write_text(json.dumps(manifest))
+        with self.assertRaises(ContractError):
+            validate_sources(self.root)
+
+    def test_publication_check_catches_undersized_icon_and_missing_recording(self):
+        asset = self.root / "assets/worknew-icon.svg"
+        asset.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"/>')
+        manifest_path = self.root / ".codex-plugin/plugin.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["extensions"]["com.openai"]["review"].pop("demo_recording_url", None)
+        manifest_path.write_text(json.dumps(manifest))
+        gaps = publication_gaps(self.root)
+        self.assertTrue(any("SVG" in gap for gap in gaps))
+        self.assertTrue(any("recording" in gap for gap in gaps))
+        asset.write_text('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 32 32"/>')
+        self.assertFalse(any("SVG" in gap for gap in publication_gaps(self.root)))
+        self.assertTrue(any("recording" in gap for gap in publication_gaps(self.root)))
 
     def test_default_build_uses_only_public_endpoint(self):
         target = build(self.root)
