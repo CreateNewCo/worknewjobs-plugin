@@ -24,7 +24,7 @@ Dit document scheidt voorbereide bestanden van platformacceptatie. Een geslaagde
 | Branding | Officieel SVG opgehaald van de publieke WorkNew-site; komt byte-voor-byte overeen met het bestaande WordPress-themeasset. Met expliciete toestemming alleen width en height naar 512 × 512 aangepast; artwork ongewijzigd. |
 | Lokale packagechecks | 18 Python-tests geslaagd, plus negen directe MCP-controles; zie verification-2026-11-02.json. Claude CLI 2.1.316 valideerde het connected pakket zonder directoryfindings. Definitieve assets en platformscans blijven afzonderlijk nodig. |
 | OpenAI-/portable schema | plugin.json slaagt tegen het gepubliceerde Agent Plugins-schema. De MCP-kern slaagt zonder de OpenAI-extensie; het generieke MCP-schema weigert per-server extensions, terwijl de actuele OpenAI-documentatie de gebruikte auth-extensie expliciet voorschrijft. De gedocumenteerde auth-configuratie blijft behouden; portalvalidatie moet dit bevestigen. Schemas en hashes staan in het verificatiebestand. |
-| GitHub-release | Repository is publiek. De nieuwe 0.4.0-bestanden moeten nog worden gepusht en teruggelezen. |
+| GitHub-release | Repository is publiek. De 0.4.0-bron staat op `prepare/directory-publication-0.4.0`, met draft-PR https://github.com/CreateNewCo/worknewjobs-plugin/pull/1. Branch en PR-head zijn teruggelezen. Main is niet gewijzigd; CI en platformacceptatie zijn afzonderlijke controles. |
 | ChatGPT-hosttest | Niet uitgevoerd. Test installatie, onboarding en alle reviewcases met de verbonden release. |
 | Claude-hosttest | Niet uitgevoerd. Test installatie, onboarding en alle reviewcases met de verbonden release. |
 | Video | Nog geen opgenomen en publiek/reviewer-bereikbaar walkthroughbestand. De uitlegpagina is geen video. |
